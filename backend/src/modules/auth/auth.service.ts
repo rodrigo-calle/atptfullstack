@@ -26,7 +26,11 @@ export class AuthService {
     if (!isMatch) {
       throw new UnauthorizedException();
     }
-    const payload = { userId: user.id, username: user.username };
+    const payload = {
+      userId: user.id,
+      username: user.username,
+      isAdmin: user.isAdmin,
+    };
 
     return {
       access_token: await this.jwtService.signAsync(payload),
@@ -49,7 +53,9 @@ export class AuthService {
   async signUp(
     username: string,
     password: string,
-  ): Promise<Omit<User, 'password'>> {
+  ): Promise<
+    Omit<User, 'password' | 'clientsAproved' | 'clientsUploaded' | 'files'>
+  > {
     const user = await this.usersService.findOne({ username });
     if (user) {
       throw new ForbiddenException();
@@ -61,6 +67,7 @@ export class AuthService {
       username,
       password: passWordHash,
       isAdmin: false,
+      files: [],
     });
 
     return newUser;

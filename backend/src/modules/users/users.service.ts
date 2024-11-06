@@ -10,7 +10,11 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async create(user: Omit<User, 'id'>): Promise<Omit<User, 'password'>> {
+  async create(
+    user: Omit<User, 'id' | 'clientsAproved' | 'clientsUploaded'>,
+  ): Promise<
+    Omit<User, 'password' | 'clientsAproved' | 'clientsUploaded' | 'files'>
+  > {
     const newUser = await this.usersRepository.save(user);
     return {
       id: newUser.id,

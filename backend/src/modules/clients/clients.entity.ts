@@ -30,5 +30,5 @@ export class Client {
   uploadedBy: User;
 
   @ManyToOne(() => File, (file) => file.clients)
-  files: File;
+  file: File;
 }

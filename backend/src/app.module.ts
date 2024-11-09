@@ -11,9 +11,15 @@ import { Client } from './modules/clients/clients.entity';
 import { File } from './modules/files/files.entity';
 import { ConfigModule } from '@nestjs/config';
 import { SupabaseModule } from './modules/supabase/supabase.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { FileCreatedListener } from './modules/files/listeners/fileCreated.listener';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { UsersModule } from './modules/users/users.module';
+import { Notification } from './modules/notifications/notifications.entity';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -22,16 +28,18 @@ import { SupabaseModule } from './modules/supabase/supabase.module';
       username: 'admin',
       password: 'password',
       database: 'apt_database',
-      entities: [User, Client, File],
+      entities: [User, Client, File, Notification],
       synchronize: true,
     }),
     AuthModule,
     ClientsModule,
     FilesModule,
     SupabaseModule,
+    NotificationsModule,
+    UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, FileCreatedListener],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}

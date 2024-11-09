@@ -38,6 +38,6 @@ export class File {
   @ManyToOne(() => User, (user) => user.files)
   user: User;
 
-  @OneToMany(() => Client, (client) => client.files)
+  @OneToMany(() => Client, (client) => client.file)
   clients: Client[];
 }

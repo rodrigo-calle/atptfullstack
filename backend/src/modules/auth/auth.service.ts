@@ -54,7 +54,19 @@ export class AuthService {
     username: string,
     password: string,
   ): Promise<
-    Omit<User, 'password' | 'clientsAproved' | 'clientsUploaded' | 'files'>
+    Omit<
+      User,
+      | 'password'
+      | 'clientsAproved'
+      | 'clientsUploaded'
+      | 'files'
+      | 'notificationSentTo'
+      | 'notificationsReaded'
+      | 'notificationsSentBy'
+      | 'medal'
+      | 'lastMedal'
+      | 'newClientsForRegister'
+    >
   > {
     const user = await this.usersService.findOne({ username });
     if (user) {
@@ -68,6 +80,10 @@ export class AuthService {
       password: passWordHash,
       isAdmin: false,
       files: [],
+      clientsRegistered: 0,
+      lastMedal: null,
+      medals: null,
+      newClientsForRegister: 0,
     });
 
     return newUser;

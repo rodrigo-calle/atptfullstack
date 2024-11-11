@@ -35,7 +35,7 @@ type Props = {
 const items = [
   {
     title: "Importar Clientes",
-    url: "#",
+    url: "/dashboard/upload",
     icon: Upload,
     userType: "user",
   },

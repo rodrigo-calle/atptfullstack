@@ -11,6 +11,7 @@ import NotificationsPage from "./pages/dashboard/admin/notificationsPage";
 import UserHistoricPage from "./pages/dashboard/admin/userHistoricPage";
 import UserPersonalHistoricPage from "./pages/dashboard/admin/userPersonalHistoricPage";
 import PendingFilesPage from "./pages/dashboard/admin/pendingFilesPage";
+import UploadPage from "./pages/dashboard/user/uploadPage";
 
 function App() {
   const isAuthenticated = useIsAuthenticated();
@@ -31,6 +32,8 @@ function App() {
             path="userHistoric/:id"
             element={<UserPersonalHistoricPage />}
           />
+
+          <Route path="upload" element={<UploadPage />} />
         </Route>
       )}
     </Routes>

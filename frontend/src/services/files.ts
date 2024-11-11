@@ -1,12 +1,29 @@
-import { File } from "@/common/types/file";
+import { File as FileType } from "@/common/types/file";
 import axios from "axios";
 
 const baseUrl = "http://localhost:3000";
 const authToken = localStorage.getItem("token");
 
+const uploadFile = async (file: File) => {
+  const bearerToken = `Bearer ${authToken}`;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await axios.post<FileType>(
+    `${baseUrl}/files/clients/upload`,
+    formData,
+    {
+      headers: {
+        Authorization: bearerToken,
+      },
+    }
+  );
+  return response.data;
+};
+
 const getFilesByUser = async (userId: number) => {
   const bearerToken = `Bearer ${authToken}`;
-  const response = await axios.get<File[]>(
+  const response = await axios.get<FileType[]>(
     `${baseUrl}/files/clients/${userId}`,
     {
       headers: {
@@ -24,7 +41,7 @@ const getFilesByUser = async (userId: number) => {
 
 const approveFile = async (fileId: number) => {
   const bearerToken = `Bearer ${authToken}`;
-  const response = await axios.patch<File>(
+  const response = await axios.patch<FileType>(
     `${baseUrl}/files/approve/${fileId}`,
     {},
     {
@@ -39,7 +56,7 @@ const approveFile = async (fileId: number) => {
 
 const rejectFile = async (fileId: number) => {
   const bearerToken = `Bearer ${authToken}`;
-  const response = await axios.patch<File>(
+  const response = await axios.patch<FileType>(
     `${baseUrl}/files/reject/${fileId}`,
     {},
     {
@@ -53,7 +70,7 @@ const rejectFile = async (fileId: number) => {
 
 const getAllFiles = async () => {
   const bearerToken = `Bearer ${authToken}`;
-  const response = await axios.get<File[]>(`${baseUrl}/files`, {
+  const response = await axios.get<FileType[]>(`${baseUrl}/files`, {
     headers: {
       Authorization: bearerToken,
     },
@@ -71,4 +88,5 @@ export const fileServices = {
   getAllFiles,
   approveFile,
   rejectFile,
+  uploadFile,
 };

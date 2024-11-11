@@ -10,6 +10,7 @@ import { useIsAuthenticated } from "./hooks/is-authenticated";
 import NotificationsPage from "./pages/dashboard/admin/notificationsPage";
 import UserHistoricPage from "./pages/dashboard/admin/userHistoricPage";
 import UserPersonalHistoricPage from "./pages/dashboard/admin/userPersonalHistoricPage";
+import PendingFilesPage from "./pages/dashboard/admin/pendingFilesPage";
 
 function App() {
   const isAuthenticated = useIsAuthenticated();
@@ -23,6 +24,7 @@ function App() {
       {isAuthenticated && (
         <Route path="/dashboard" element={<LayoutDashboard />}>
           <Route index element={<FilesPage />} />
+          <Route path="pendingFiles" element={<PendingFilesPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="userHistoric" element={<UserHistoricPage />} />
           <Route

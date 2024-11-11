@@ -22,6 +22,53 @@ const getFilesByUser = async (userId: number) => {
   return response.data;
 };
 
+const approveFile = async (fileId: number) => {
+  const bearerToken = `Bearer ${authToken}`;
+  const response = await axios.patch<File>(
+    `${baseUrl}/files/approve/${fileId}`,
+    {},
+    {
+      headers: {
+        Authorization: bearerToken,
+      },
+    }
+  );
+
+  return response;
+};
+
+const rejectFile = async (fileId: number) => {
+  const bearerToken = `Bearer ${authToken}`;
+  const response = await axios.patch<File>(
+    `${baseUrl}/files/reject/${fileId}`,
+    {},
+    {
+      headers: {
+        Authorization: bearerToken,
+      },
+    }
+  );
+  return response;
+};
+
+const getAllFiles = async () => {
+  const bearerToken = `Bearer ${authToken}`;
+  const response = await axios.get<File[]>(`${baseUrl}/files`, {
+    headers: {
+      Authorization: bearerToken,
+    },
+  });
+
+  if (!response.data) {
+    return null;
+  }
+  console.log(response.data);
+  return response.data;
+};
+
 export const fileServices = {
   getFilesByUser,
+  getAllFiles,
+  approveFile,
+  rejectFile,
 };

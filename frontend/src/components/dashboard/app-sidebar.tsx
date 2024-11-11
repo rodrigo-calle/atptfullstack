@@ -47,7 +47,7 @@ const items = [
   },
   {
     title: "Archivos Pendientes",
-    url: "#",
+    url: "/dashboard/pendingFiles",
     icon: FileArchive,
     userType: "admin",
   },

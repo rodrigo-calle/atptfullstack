@@ -41,7 +41,7 @@ export class FilesController {
       const user = await this.usersService.findOne({ id: req.user.userId });
       if (!user) throw new Error('User not found');
 
-      await this.filesService.create({
+      const newFile = await this.filesService.create({
         clients: [],
         fileUrl,
         user,
@@ -50,6 +50,7 @@ export class FilesController {
       return {
         message: 'CSV file uploaded successfully',
         fileUrl,
+        id: newFile.id,
       };
     }
 
@@ -67,6 +68,13 @@ export class FilesController {
   }
 
   @UseGuards(AuthGuard)
+  @Get()
+  async getAllFiles() {
+    const files = await this.filesService.findAll();
+    return files;
+  }
+
+  @UseGuards(AuthGuard)
   @Patch('/approve/:fileId')
   async approveFile(@Request() req, @Param('fileId') fileId: number) {
     if (!req.user.userId) {
@@ -75,6 +83,18 @@ export class FilesController {
 
     return this.filesService.update(fileId, req.user.userId, {
       status: FileStatus.APPROVED,
+    });
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('/reject/:fileId')
+  async rejectFile(@Request() req, @Param('fileId') fileId: number) {
+    if (!req.user.userId) {
+      throw new Error('User not found');
+    }
+
+    return this.filesService.update(fileId, req.user.userId, {
+      status: FileStatus.REJECTED,
     });
   }
 }

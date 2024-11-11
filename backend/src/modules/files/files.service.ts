@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { File } from './files.entity';
+import { File, FileStatus } from './files.entity';
 import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FileCreatedEvent } from './events/fileCreated.event';
@@ -69,30 +69,74 @@ export class FilesService {
     const fileToUpdate = await this.filesRepository.findOne({
       where: { id },
       select: {
+        status: true,
+        id: true,
         user: {
           medals: true,
           clientsRegistered: true,
+          id: true,
+          lastMedal: true,
         },
       },
       relations: {
         user: true,
       },
     });
-    if (!fileToUpdate) return null;
-    const updatedFile = await this.filesRepository.update(id, file);
 
-    if (file.status) {
-      const totalClients = await this.countCsvRecords(fileToUpdate.fileUrl);
+    if (fileToUpdate && Object.keys(file).length === 1 && file.status) {
+      const updatedFile = await this.filesRepository.update(id, file);
+
+      const totalClientsInFile = await this.countCsvRecords(
+        fileToUpdate.fileUrl,
+      );
       const fileUpdatedEvent = new FileUpdatedEvent();
       fileUpdatedEvent.user = fileToUpdate.user;
       fileUpdatedEvent.status = file.status;
       fileUpdatedEvent.updatedBy = updatedBy;
       fileUpdatedEvent.updatedDate = new Date();
-      fileUpdatedEvent.totalClients = totalClients;
-      fileUpdatedEvent.id = fileToUpdate.id;
+      fileUpdatedEvent.totalClients = totalClientsInFile;
+      fileUpdatedEvent.fileId = fileToUpdate.id;
 
-      this.eventEmitter.emit('file.updated.status', fileUpdatedEvent);
+      if (file.status === FileStatus.APPROVED) {
+        this.eventEmitter.emit(
+          'file.updated.status.approved',
+          fileUpdatedEvent,
+        );
+      }
+
+      if (file.status === FileStatus.REJECTED) {
+        console.log('REJECTED');
+        this.eventEmitter.emit(
+          'file.updated.status.rejected',
+          fileUpdatedEvent,
+        );
+      }
+
+      return updatedFile.raw[0];
     }
+    // if (
+    //   !fileToUpdate ||
+    //   fileToUpdate.status === FileStatus.APPROVED ||
+    //   fileToUpdate.status === FileStatus.REJECTED
+    // ) {
+    //   return null;
+    // }
+    const updatedFile = await this.filesRepository.update(id, file);
+
+    // if (file.status) {
+    //   const totalClientsInFile = await this.countCsvRecords(
+    //     fileToUpdate.fileUrl,
+    //   );
+    //   const fileUpdatedEvent = new FileUpdatedEvent();
+    //   fileUpdatedEvent.user = fileToUpdate.user;
+    //   fileUpdatedEvent.status = file.status;
+    //   fileUpdatedEvent.updatedBy = updatedBy;
+    //   fileUpdatedEvent.updatedDate = new Date();
+    //   fileUpdatedEvent.totalClients = totalClientsInFile;
+    //   fileUpdatedEvent.fileId = fileToUpdate.id;
+
+    //   this.eventEmitter.emit('file.updated.status', fileUpdatedEvent);
+    // }
 
     return updatedFile.raw[0];
   }
@@ -125,5 +169,36 @@ export class FilesService {
       console.error('Error al leer el archivo CSV:', error);
       return 0;
     }
+  }
+
+  async findAll(): Promise<File[]> {
+    const files = await this.filesRepository.find({
+      select: {
+        id: true,
+        fileUrl: true,
+        status: true,
+        createdAt: true,
+        user: {
+          id: true,
+          username: true,
+          lastMedal: true,
+          medals: true,
+        },
+      },
+      relations: {
+        user: true,
+      },
+    });
+    const newFiles = Promise.all(
+      files?.map(async (file) => {
+        const totalClientsInFile = await this.countCsvRecords(file.fileUrl);
+        return {
+          ...file,
+          clientsInFile: totalClientsInFile,
+        };
+      }),
+    );
+
+    return newFiles;
   }
 }

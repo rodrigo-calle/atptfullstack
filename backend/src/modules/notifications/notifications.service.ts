@@ -66,4 +66,34 @@ export class NotificationsService {
     });
     return notifications;
   }
+
+  async finAllSentBySendTo(sentToId: number): Promise<Notification[]> {
+    const notifications = await this.notificationsRepository.find({
+      where: { sentTo: { id: sentToId } },
+      select: {
+        sentBy: {
+          id: true,
+          username: true,
+        },
+        readedBy: {
+          id: true,
+          username: true,
+        },
+        sentTo: {
+          id: true,
+        },
+      },
+      relations: {
+        sentBy: true,
+        readedBy: true,
+        sentTo: true,
+      },
+    });
+    return notifications;
+  }
+
+  async findAll(): Promise<Notification[]> {
+    const notifications = await this.notificationsRepository.find();
+    return notifications;
+  }
 }

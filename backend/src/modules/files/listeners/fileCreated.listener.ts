@@ -49,9 +49,8 @@ export class FileCreatedListener {
     });
   }
 
-  @OnEvent('file.updated.status')
-  async handleFileUpdatedStatusEvent(event: FileUpdatedEvent) {
-    console.log({ event });
+  @OnEvent('file.updated.status.approved')
+  async handleFileUpdatedStatusApprovedEvent(event: FileUpdatedEvent) {
     // Send notification to users
     const user = await this.usersService.findOne({ id: event.updatedBy });
     const eventUser = await this.usersService.findOne({
@@ -60,7 +59,7 @@ export class FileCreatedListener {
 
     await this.notificationService.create({
       date: new Date(),
-      message: `File ${event.id} updated to ${event.status} by ${user.username}`,
+      message: `File ${event.fileId} updated to ${event.status} by ${user.username}`,
       readedBy: null,
       sentBy: user,
       sentTo: eventUser,
@@ -71,25 +70,41 @@ export class FileCreatedListener {
     const { medals, clientsRegistered } = event.user;
 
     const currentMedals = medals ? (JSON.parse(medals) as Medal[]) : [];
-    const newMedals = currentMedals.map((medal) => {
+
+    const { newMedals, newClientsRegistered } = getMedalAfterUpload(
+      currentMedals,
+      event.totalClients,
+      clientsRegistered,
+    );
+
+    const verifiedMedals = currentMedals.map((medal) => {
       return {
         ...medal,
         verified: true,
       };
     });
+    const lastMedal = newMedals[verifiedMedals.length - 1].name;
 
-    const lastMedal = newMedals[newMedals.length - 1];
+    await this.usersService.update(event.user.id, {
+      medals: JSON.stringify(verifiedMedals),
+      lastMedal,
+      clientsRegistered: clientsRegistered + newClientsRegistered,
+    });
+  }
 
-    // await this.usersService.update(event.user.id, {
-    //   medals: JSON.stringify(newMedals),
-    //   lastMedal: lastMedal.name,
-    //   newClientsForRegister: clientsRegistered - event.totalClients,
-    // });
-
-    console.log({
-      medals: JSON.stringify(newMedals),
-      lastMedal: lastMedal.name,
-      newClientsForRegister: clientsRegistered - event.totalClients,
+  @OnEvent('file.updated.status.rejected')
+  async handleFileUpdatedStatusRejectedEvent(event: FileUpdatedEvent) {
+    const user = await this.usersService.findOne({ id: event.updatedBy });
+    const eventUser = await this.usersService.findOne({
+      id: event.user.id,
+    });
+    await this.notificationService.create({
+      date: new Date(),
+      message: `File ${event.fileId} updated to ${event.status} by ${user.username}`,
+      readedBy: null,
+      sentBy: user,
+      sentTo: eventUser,
+      type: NotificationType.WARNING,
     });
   }
 }

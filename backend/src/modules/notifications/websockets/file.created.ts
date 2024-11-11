@@ -14,4 +14,14 @@ export class NotificationsGateway {
   handleClienteCreado(@MessageBody() payload: any) {
     this.server.emit('new-file-notification', payload);
   }
+
+  @OnEvent('file.updated.status.approved')
+  handleFileUpdated(@MessageBody() payload: any) {
+    this.server.emit('file-updated-approved', payload);
+  }
+
+  @OnEvent('file.updated.status.rejected')
+  handleFileUpdatedRejected(@MessageBody() payload: any) {
+    this.server.emit('file-updated-rejected', payload);
+  }
 }

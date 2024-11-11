@@ -6,6 +6,6 @@ export class FileUpdatedEvent {
   username?: string;
   status: string;
   totalClients: number;
-  id: number;
+  fileId: number;
   user: User;
 }

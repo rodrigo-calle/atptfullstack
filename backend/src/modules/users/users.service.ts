@@ -90,6 +90,7 @@ export class UsersService {
   }
 
   async update(id: number, user: Partial<User>): Promise<User> {
+    console.log({ user });
     const updatedUser = await this.usersRepository.update(id, user);
     return updatedUser.raw[0];
   }

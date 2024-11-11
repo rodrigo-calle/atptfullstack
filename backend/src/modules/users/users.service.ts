@@ -50,8 +50,38 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  findOne(user: { id?: number; username?: string }): Promise<User | null> {
-    if (user.id) return this.usersRepository.findOneBy({ id: user.id });
+  findAllNoAdmin(): Promise<User[]> {
+    return this.usersRepository.find({ where: { isAdmin: false } });
+  }
+
+  async findOne(user: {
+    id?: number;
+    username?: string;
+  }): Promise<User | null> {
+    if (user.id) {
+      const userFound = await this.usersRepository.find({
+        where: { id: user.id },
+        select: {
+          username: true,
+          id: true,
+          medals: true,
+          lastMedal: true,
+          isAdmin: true,
+          files: {
+            id: true,
+            status: true,
+            fileUrl: true,
+            createdAt: true,
+            clients: true,
+          },
+        },
+        relations: {
+          files: true,
+        },
+      });
+
+      return userFound[0];
+    }
 
     if (user.username)
       return this.usersRepository.findOneBy({ username: user.username });

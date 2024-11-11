@@ -15,6 +15,7 @@ export class NotificationsService {
   ): Promise<Notification> {
     const newNotification =
       await this.notificationsRepository.save(notification);
+
     return newNotification;
   }
 
@@ -32,6 +33,35 @@ export class NotificationsService {
           username: true,
           isAdmin: true,
         },
+      },
+    });
+    return notifications;
+  }
+
+  async findAllSentByUsers(): Promise<Notification[]> {
+    const notifications = await this.notificationsRepository.find({
+      where: {
+        sentBy: {
+          isAdmin: false,
+        },
+      },
+      select: {
+        sentBy: {
+          id: true,
+          username: true,
+        },
+        readedBy: {
+          id: true,
+          username: true,
+        },
+        sentTo: {
+          id: true,
+        },
+      },
+      relations: {
+        sentBy: true,
+        readedBy: true,
+        sentTo: true,
       },
     });
     return notifications;

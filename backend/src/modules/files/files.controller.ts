@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Request,
   UploadedFile,
@@ -15,6 +16,7 @@ import { CsvFileValidationPipe } from 'src/utils/validators/clientsFileValidator
 import { FilesService } from './files.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { UsersService } from '../users/users.service';
+import { FileStatus } from './files.entity';
 
 @Controller('files')
 export class FilesController {
@@ -60,8 +62,19 @@ export class FilesController {
   @UseGuards(AuthGuard)
   @Get('clients/:userId')
   async getFilesByUser(@Param('userId') userId: number) {
-    console.log({ userId });
     const files = await this.filesService.findManyByUser(userId);
     return files;
+  }
+
+  @UseGuards(AuthGuard)
+  @Patch('/approve/:fileId')
+  async approveFile(@Request() req, @Param('fileId') fileId: number) {
+    if (!req.user.userId) {
+      throw new Error('User not found');
+    }
+
+    return this.filesService.update(fileId, req.user.userId, {
+      status: FileStatus.APPROVED,
+    });
   }
 }

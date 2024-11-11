@@ -6,6 +6,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { FileCreatedEvent } from './events/fileCreated.event';
 import { Readable } from 'stream';
 import * as csvParser from 'csv-parser';
+import { FileUpdatedEvent } from './events/fileUpdated.event';
 
 @Injectable()
 export class FilesService {
@@ -33,17 +34,67 @@ export class FilesService {
     const files = await this.filesRepository.find({
       where: { user: { id: userId } },
       select: {
+        id: true,
         user: {
           id: true,
           username: true,
+          lastMedal: true,
+          medals: true,
         },
+        fileUrl: true,
+        status: true,
       },
       relations: {
         user: true,
         clients: true,
       },
     });
+
+    return Promise.all(
+      files.map(async (file) => ({
+        ...file,
+        clientsInFile: await this.countCsvRecords(file.fileUrl),
+      })),
+    );
+  }
+
+  async findManyByUserNoAdmin(): Promise<File[]> {
+    const files = await this.filesRepository.find({
+      where: { user: { isAdmin: false } },
+    });
     return files;
+  }
+
+  async update(id: number, updatedBy: number, file: Partial<File | null>) {
+    const fileToUpdate = await this.filesRepository.findOne({
+      where: { id },
+      select: {
+        user: {
+          medals: true,
+          clientsRegistered: true,
+        },
+      },
+      relations: {
+        user: true,
+      },
+    });
+    if (!fileToUpdate) return null;
+    const updatedFile = await this.filesRepository.update(id, file);
+
+    if (file.status) {
+      const totalClients = await this.countCsvRecords(fileToUpdate.fileUrl);
+      const fileUpdatedEvent = new FileUpdatedEvent();
+      fileUpdatedEvent.user = fileToUpdate.user;
+      fileUpdatedEvent.status = file.status;
+      fileUpdatedEvent.updatedBy = updatedBy;
+      fileUpdatedEvent.updatedDate = new Date();
+      fileUpdatedEvent.totalClients = totalClients;
+      fileUpdatedEvent.id = fileToUpdate.id;
+
+      this.eventEmitter.emit('file.updated.status', fileUpdatedEvent);
+    }
+
+    return updatedFile.raw[0];
   }
 
   async countCsvRecords(url: string): Promise<number> {

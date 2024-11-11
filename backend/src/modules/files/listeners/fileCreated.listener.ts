@@ -7,6 +7,7 @@ import { UsersService } from 'src/modules/users/users.service';
 import { FilesService } from '../files.service';
 import { getMedalAfterUpload } from 'src/utils/medals';
 import { Medal } from 'src/common/types';
+import { FileUpdatedEvent } from '../events/fileUpdated.event';
 
 @Injectable()
 export class FileCreatedListener {
@@ -46,7 +47,49 @@ export class FileCreatedListener {
       medals: JSON.stringify(newMedals),
       newClientsForRegister: newClientsRegistered,
     });
+  }
 
-    console.log('File created', event);
+  @OnEvent('file.updated.status')
+  async handleFileUpdatedStatusEvent(event: FileUpdatedEvent) {
+    console.log({ event });
+    // Send notification to users
+    const user = await this.usersService.findOne({ id: event.updatedBy });
+    const eventUser = await this.usersService.findOne({
+      id: event.user.id,
+    });
+
+    await this.notificationService.create({
+      date: new Date(),
+      message: `File ${event.id} updated to ${event.status} by ${user.username}`,
+      readedBy: null,
+      sentBy: user,
+      sentTo: eventUser,
+      type: NotificationType.INFO,
+    });
+
+    // Update medal of user
+    const { medals, clientsRegistered } = event.user;
+
+    const currentMedals = medals ? (JSON.parse(medals) as Medal[]) : [];
+    const newMedals = currentMedals.map((medal) => {
+      return {
+        ...medal,
+        verified: true,
+      };
+    });
+
+    const lastMedal = newMedals[newMedals.length - 1];
+
+    // await this.usersService.update(event.user.id, {
+    //   medals: JSON.stringify(newMedals),
+    //   lastMedal: lastMedal.name,
+    //   newClientsForRegister: clientsRegistered - event.totalClients,
+    // });
+
+    console.log({
+      medals: JSON.stringify(newMedals),
+      lastMedal: lastMedal.name,
+      newClientsForRegister: clientsRegistered - event.totalClients,
+    });
   }
 }

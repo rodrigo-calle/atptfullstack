@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { User } from './modules/users/user.entity';
@@ -38,8 +36,8 @@ import { Notification } from './modules/notifications/notifications.entity';
     NotificationsModule,
     UsersModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, FileCreatedListener],
+  controllers: [],
+  providers: [FileCreatedListener],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {}

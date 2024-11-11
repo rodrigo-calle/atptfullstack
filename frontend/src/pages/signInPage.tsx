@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { z } from "zod";
+import { authServices } from "../services/auth";
 
 const signInUserSchema = z.object({
   username: z
@@ -39,8 +40,35 @@ const SignInPage = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ values });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (
+      signInType === "username" &&
+      "username" in values &&
+      "password" in values
+    ) {
+      const response = await authServices.signInService(
+        values.username,
+        values.password
+      );
+      if (!response) {
+        return;
+      }
+
+      localStorage.setItem("token", response.access_token);
+
+      window.location.href = "/dashboard";
+    }
+
+    if (signInType === "id" && "id" in values) {
+      const response = await authServices.signInWithIdService(
+        parseInt(values.id)
+      );
+      if (!response) {
+        return;
+      }
+
+      localStorage.setItem("token", response.access_token);
+    }
   }
 
   return (

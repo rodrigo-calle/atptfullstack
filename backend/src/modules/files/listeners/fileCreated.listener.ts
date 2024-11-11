@@ -57,6 +57,8 @@ export class FileCreatedListener {
       id: event.user.id,
     });
 
+    // const file = await this.filesService.findOne({ id: event.fileId });
+
     await this.notificationService.create({
       date: new Date(),
       message: `File ${event.fileId} updated to ${event.status} by ${user.username}`,
@@ -65,10 +67,12 @@ export class FileCreatedListener {
       sentTo: eventUser,
       type: NotificationType.INFO,
     });
-
+    // const clientesQuantityRegistered = await this.filesService.countCsvRecords(
+    //   file.fileUrl,
+    // );
     // Update medal of user
     const { medals, clientsRegistered } = event.user;
-
+    // AGREGAR EL NUMERO DE CURRENT CLIENTS AL ATRIBUTO DE USUARIO
     const currentMedals = medals ? (JSON.parse(medals) as Medal[]) : [];
 
     const { newMedals, newClientsRegistered } = getMedalAfterUpload(
@@ -83,8 +87,15 @@ export class FileCreatedListener {
         verified: true,
       };
     });
-    const lastMedal = newMedals[verifiedMedals.length - 1].name;
 
+    console.log({
+      currentMedals,
+      verifiedMedals,
+      newMedals,
+      newClientsRegistered,
+    });
+    const lastMedal = newMedals[verifiedMedals.length - 1].name;
+    console.log({ user });
     await this.usersService.update(event.user.id, {
       medals: JSON.stringify(verifiedMedals),
       lastMedal,

@@ -67,6 +67,8 @@ export class UsersService {
           medals: true,
           lastMedal: true,
           isAdmin: true,
+          newClientsForRegister: true,
+          clientsRegistered: true,
           files: {
             id: true,
             status: true,

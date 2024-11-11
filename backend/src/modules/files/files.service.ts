@@ -30,6 +30,28 @@ export class FilesService {
     return newFile;
   }
 
+  async findOne({ id }: { id: number }) {
+    const file = await this.filesRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        user: {
+          id: true,
+          username: true,
+          lastMedal: true,
+          medals: true,
+        },
+        fileUrl: true,
+        status: true,
+      },
+      relations: {
+        user: true,
+        clients: true,
+      },
+    });
+    return file;
+  }
+
   async findManyByUser(userId: number) {
     const files = await this.filesRepository.find({
       where: { user: { id: userId } },
@@ -114,29 +136,8 @@ export class FilesService {
 
       return updatedFile.raw[0];
     }
-    // if (
-    //   !fileToUpdate ||
-    //   fileToUpdate.status === FileStatus.APPROVED ||
-    //   fileToUpdate.status === FileStatus.REJECTED
-    // ) {
-    //   return null;
-    // }
+
     const updatedFile = await this.filesRepository.update(id, file);
-
-    // if (file.status) {
-    //   const totalClientsInFile = await this.countCsvRecords(
-    //     fileToUpdate.fileUrl,
-    //   );
-    //   const fileUpdatedEvent = new FileUpdatedEvent();
-    //   fileUpdatedEvent.user = fileToUpdate.user;
-    //   fileUpdatedEvent.status = file.status;
-    //   fileUpdatedEvent.updatedBy = updatedBy;
-    //   fileUpdatedEvent.updatedDate = new Date();
-    //   fileUpdatedEvent.totalClients = totalClientsInFile;
-    //   fileUpdatedEvent.fileId = fileToUpdate.id;
-
-    //   this.eventEmitter.emit('file.updated.status', fileUpdatedEvent);
-    // }
 
     return updatedFile.raw[0];
   }

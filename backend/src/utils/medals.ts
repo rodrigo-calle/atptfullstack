@@ -14,7 +14,7 @@ const getExistingMedals = (
 };
 
 export function getMedalAfterUpload(
-  currentMedals: Medal[] | null,
+  currentMedals: Medal[] | null = [],
   newClientsRegistered: number,
   currentClientsRegistered: number,
 ): {
@@ -23,7 +23,7 @@ export function getMedalAfterUpload(
   newClientsRegistered: number;
 } {
   const totalMedals = newClientsRegistered + currentClientsRegistered;
-  const newMedals: Medal[] = [];
+  const newMedals: Medal[] = [...currentMedals];
   if (currentMedals.length === 0) {
     if (newClientsRegistered >= 10) {
       newMedals.push({
@@ -98,6 +98,7 @@ export function getMedalAfterUpload(
       });
     }
   } else {
+    console.log(currentMedals);
     if (totalMedals >= 10) {
       const verified = getExistingMedals(currentMedals, MedalStatus.MADERA);
       newMedals.push({
@@ -179,6 +180,11 @@ export function getMedalAfterUpload(
       });
     }
   }
+  console.log({
+    newMedals,
+    lastClientsRegistered: currentClientsRegistered,
+    newClientsRegistered,
+  });
   return {
     newMedals,
     lastClientsRegistered: currentClientsRegistered,

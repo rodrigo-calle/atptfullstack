@@ -8,7 +8,9 @@ import { Link } from "react-router-dom";
 
 const UploadPage = () => {
   const [fileUploaded, setFileUploaded] = React.useState<File | null>(null);
+  const [isUploading, setUploading] = React.useState(false);
   const handleUpload = async () => {
+    setUploading(true);
     const fileInput = document.getElementById("file") as HTMLInputElement;
     const file = fileInput.files?.[0];
 
@@ -21,6 +23,7 @@ const UploadPage = () => {
       alert("Archivo cargado exitosamente");
       fileInput.value = "";
     }
+    setUploading(false);
   };
 
   return (
@@ -30,7 +33,12 @@ const UploadPage = () => {
         <div className="grid w-full max-w-sm items-center gap-1.5 mt-10">
           <Label htmlFor="file">Subir Archivo</Label>
           <Input id="file" type="file" accept=".csv" />
-          <Button type="submit" onClick={handleUpload} variant="default">
+          <Button
+            type="submit"
+            onClick={handleUpload}
+            variant="default"
+            disabled={isUploading}
+          >
             Subir
           </Button>
         </div>
@@ -52,6 +60,9 @@ const UploadPage = () => {
           )}
         </div>
       </div>
+      <Link to="/dashboard/medals" className="text-blue-500 underline">
+        Ver mis Medallas
+      </Link>
     </div>
   );
 };

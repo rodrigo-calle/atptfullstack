@@ -12,6 +12,7 @@ import UserHistoricPage from "./pages/dashboard/admin/userHistoricPage";
 import UserPersonalHistoricPage from "./pages/dashboard/admin/userPersonalHistoricPage";
 import PendingFilesPage from "./pages/dashboard/admin/pendingFilesPage";
 import UploadPage from "./pages/dashboard/user/uploadPage";
+import MedalsPage from "./pages/dashboard/user/medalsPage";
 
 function App() {
   const isAuthenticated = useIsAuthenticated();
@@ -33,6 +34,7 @@ function App() {
             element={<UserPersonalHistoricPage />}
           />
 
+          <Route path="medals" element={<MedalsPage />} />
           <Route path="upload" element={<UploadPage />} />
         </Route>
       )}

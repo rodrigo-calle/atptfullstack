@@ -41,7 +41,7 @@ const items = [
   },
   {
     title: "Medallas",
-    url: "#",
+    url: "/dashboard/medals",
     icon: Medal,
     userType: "user",
   },

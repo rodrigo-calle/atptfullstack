@@ -1,26 +1,25 @@
-version: '3.8'
+version: "3.8"
 # Up DB service
 services:
   mysql:
-    image: mysql:8.0 # O la versión que desees de MySQL
+    image: mysql:8.0
     container_name: mysql-container-apt
     environment:
-      MYSQL_ROOT_PASSWORD: password  # Cambia esta contraseña por una más segura
-      MYSQL_DATABASE: apt_database       # Base de datos predeterminada
-      MYSQL_USER: admin                  # Usuario de la base de datos
-      MYSQL_PASSWORD: password      # Contraseña para el usuario
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: apt_database
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
     ports:
-      - "3306:3306"  # Exponer el puerto 3306 para acceder desde tu máquina
+      - "3306:3306"
     volumes:
-      - mysql-data:/var/lib/mysql  # Volumen para persistir los datos
+      - mysql-data:/var/lib/mysql
     networks:
       - mysql-network
 
 volumes:
-  mysql-data:  # Volumen para persistir los datos de MySQL entre reinicios
+  mysql-data:
     driver: local
 
 networks:
   mysql-network:
     driver: bridge
-
